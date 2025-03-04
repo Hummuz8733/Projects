@@ -11,7 +11,7 @@ IMAGES = {}
 def loadImages():
     pieces = [ "wp", "wR", "wN", "wB", "wK", "wQ", "bp", "bR", "bN", "bB", "bK", "bQ" ]
     for piece in pieces:
-        IMAGES[ piece ] = p.transform.scale( p.image.load( "images/" + piece + ".png" ), ( SQ_SIZE, SQ_SIZE ) )
+        IMAGES[ piece ] = p.transform.scale( p.image.load( "GitHub/Projects/chessbotpython/images/" + piece + ".png" ), ( SQ_SIZE, SQ_SIZE ) )
 
 
 def drawBoard( screen ):
@@ -62,12 +62,13 @@ def main():
                 if len( playerClicks ) == 2:
                     move = chessengine.Move( playerClicks[ 0 ], playerClicks[ 1 ], gs.board )
                     print( move.getChessNotation() )
-                    if move in validMoves:
-                        gs.makeMove( move )
-                        moveMade = True
-                        sqSelected = ()
-                        playerClicks = []
-                    else:
+                    for i in range( len( validMoves ) ):
+                        if move == validMoves[ i ]:
+                            gs.makeMove( validMoves[ i ] )
+                            moveMade = True
+                            sqSelected = ()
+                            playerClicks = []
+                    if not moveMade:
                         playerClicks = [ sqSelected ]
                         print("illegal")
             elif e.type == p.KEYDOWN:
