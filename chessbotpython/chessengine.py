@@ -26,6 +26,11 @@ class GameState():
         self.board[ move.startRow ][ move.startColumn ] = "--"
         self.board[ move.endRow ][ move.endColumn ] = move.pieceMoved
         self.moveLog.append( move )
+        if move.enpassant == True:
+            if self.whiteToMove:
+                self.board[ move.endRow + 1 ][ move.endColumn ] = "--"
+            else:
+                self.board[ move.endRow - 1 ][ move.endColumn ] = "--"
         self.whiteToMove = not self.whiteToMove
         if move.pieceMoved == "wK":
             self.whiteKingMoved = True
@@ -43,6 +48,7 @@ class GameState():
                 self.leftBlackRookMoved = True
             if move.startRow == 0 and move.startColumn == 7:
                 self.rightBlackRookMoved = True
+
         
 
 
@@ -51,6 +57,11 @@ class GameState():
             lastMove = self.moveLog.pop()
             self.board[ lastMove.startRow ][ lastMove.startColumn ] = lastMove.pieceMoved
             self.board[ lastMove.endRow ][ lastMove.endColumn ] = lastMove.pieceCaptured
+            if lastMove.enpassant == True:
+                if self.whiteToMove == True:
+                    self.board[ lastMove.endRow - 1 ][ lastMove.endColumn ] = "wp"
+                else:
+                    self.board[ lastMove.endRow + 1 ][ lastMove.endColumn ] = "bp"
             self.whiteToMove = not self.whiteToMove
             if lastMove.pieceMoved == "wK":
                 self.whiteKingLocation = ( lastMove.startRow, lastMove.startColumn )
@@ -76,13 +87,19 @@ class GameState():
                             if not piecePinned or pinDirection == ( -1, 0 ) or pinDirection == ( 1, 0 ):
                                 moves.append( Move(( row, column ), ( row - 2, column ), self.board ) )
             if column != 0:
-                if self.board[ row - 1 ][ column - 1 ][ 0 ] == 'b':
-                    if not piecePinned or pinDirection == ( -1, -1 ) or pinDirection == ( 1, 1 ):
+                if not piecePinned or pinDirection == ( -1, -1 ) or pinDirection == ( 1, 1 ):
+                    if self.board[ row - 1 ][ column - 1 ][ 0 ] == 'b':
                         moves.append( Move( ( row, column ), ( row - 1, column - 1 ), self.board ) )
+                    if self.board[ row ][ column - 1 ] == "bp" and self.moveLog[ -1 ].pieceMoved == "bp" and row == 3 and self.moveLog[ -1 ].startRow == 1 and self.moveLog[ -1 ].startColumn == ( column - 1 ):
+                        moves.append( Move( ( row, column ), ( row - 1, column - 1 ), self.board, True) ) 
+
             if column != 7:
-                if self.board[ row - 1 ][ column + 1 ][ 0 ] == 'b':
-                    if not piecePinned or pinDirection == ( -1, 1 ) or pinDirection == ( 1, -1 ):
+                if not piecePinned or pinDirection == ( -1, 1 ) or pinDirection == ( 1, -1 ):
+                    if self.board[ row - 1 ][ column + 1 ][ 0 ] == 'b':
                         moves.append( Move( ( row, column ), ( row - 1, column + 1 ), self.board ) )
+                    if self.board[ row ][ column + 1 ] == "bp" and self.moveLog[ -1 ].pieceMoved == "bp" and row == 3 and self.moveLog[ -1 ].startRow == 1 and self.moveLog[ -1 ].startColumn == ( column + 1 ):
+                        moves.append( Move( ( row, column ), ( row - 1, column + 1 ), self.board, True) ) 
+                    
 
         if self.board[ row ][ column ][ 0 ] == 'b':
             if self.board[ row + 1 ][ column ] == "--":
@@ -93,13 +110,17 @@ class GameState():
                         if not piecePinned or pinDirection == ( 1, 0 ) or pinDirection( -1, 0 ):
                             moves.append( Move(( row, column ), ( row + 2, column ), self.board ) )
             if column != 0:
-                if self.board[ row + 1 ][ column - 1 ][ 0 ] == 'w':
-                    if not piecePinned or pinDirection == ( 1, -1 ) or pinDirection == ( -1, 1 ):
+                if not piecePinned or pinDirection == ( 1, -1 ) or pinDirection == ( -1, 1 ):
+                    if self.board[ row + 1 ][ column - 1 ][ 0 ] == 'w':
                         moves.append( Move( ( row, column ), ( row + 1, column - 1 ), self.board ) )
+                    if self.board[ row ][ column - 1 ] == "wp" and self.moveLog[ -1 ].pieceMoved == "wp" and row == 4 and self.moveLog[ -1 ].startRow == 6 and self.moveLog[ -1 ].startColumn == ( column - 1 ):
+                        moves.append( Move( ( row, column ), ( row + 1, column - 1 ), self.board, True) ) 
             if column != 7:
-                if self.board[ row + 1 ][ column + 1 ][ 0 ] == 'w':
-                    if not piecePinned or pinDirection == ( 1, -1 ) or pinDirection == ( -1, 1 ):
+                if not piecePinned or pinDirection == ( 1, -1 ) or pinDirection == ( -1, 1 ):
+                    if self.board[ row + 1 ][ column + 1 ][ 0 ] == 'w':
                         moves.append( Move( ( row, column ), ( row + 1, column + 1 ), self.board ) )
+                    if self.board[ row ][ column + 1 ] == "wp" and self.moveLog[ -1 ].pieceMoved == "wp" and row == 4 and self.moveLog[ -1 ].startRow == 6 and self.moveLog[ -1 ].startColumn == ( column + 1 ):
+                        moves.append( Move( ( row, column ), ( row + 1, column + 1 ), self.board, True) ) 
         
 
 
@@ -189,7 +210,6 @@ class GameState():
     def getBishopMoves( self, row, column, moves ):
         piecePinned = False
         pinDirection = ()
-        print(len(self.pins))
         for i in range( len( self.pins ) -1, -1, -1 ):
             if self.pins[ i ][ 0 ] == row and self.pins[ i ][ 1 ] == column:
                 piecePinned = True
@@ -261,7 +281,6 @@ class GameState():
         self.getRookMoves( row, column, moves )
 
     def getKingMoves( self, row, column, moves ):
-        print(len(self.pins))
         moveList = {
             ( 1, 1 ), ( -1, 1 ), ( 1, -1 ), ( -1, -1 ),
             ( 1, 0 ), ( -1, 0 ), ( 0, 1 ), ( 0, -1 )
@@ -405,11 +424,12 @@ class Move():
     }
     columnsToFiles = { v: k for k , v in filesToColumns.items() }
 
-    def __init__( self, startSq, endSq, board ):
+    def __init__( self, startSq, endSq, board, isEnpassant = False ):
         self.startRow = startSq[ 0 ]
         self.startColumn = startSq[ 1 ]
         self.endRow = endSq[ 0 ]
         self.endColumn = endSq[ 1 ]
+        self.enpassant = isEnpassant
         self.pieceMoved = board[ self.startRow ][ self.startColumn ]
         self.pieceCaptured = board[ self.endRow ][ self.endColumn ]
         self.moveID = self.startRow * 1000 + self.startColumn * 100 + self.endRow * 10 + self.endColumn
