@@ -14,8 +14,9 @@ def loadImages():
         IMAGES[ piece ] = p.transform.scale( p.image.load( "GitHub/Projects/chessbotpython/images/" + piece + ".png" ), ( SQ_SIZE, SQ_SIZE ) )
 
 
-def drawBoard( screen ):
+def drawBoard( screen,  ):
     colors = [ p.Color( "antiquewhite1" ), p.Color( "burlywood3" ) ]
+    colorsHighlighted = [ p.Color( "coral1" ), p.Color( "brown1" ) ]
     for i in range( DIMENSION ):
         for j in range( DIMENSION ):
             color = colors[ ( ( i + j ) % 2 ) ]
@@ -64,8 +65,6 @@ def main():
                         move = chessengine.Move( playerClicks[ 0 ], playerClicks[ 1 ], gs.board, False, True )
                     else:
                         move = chessengine.Move( playerClicks[ 0 ], playerClicks[ 1 ], gs.board )
-
-
                     print( move.getChessNotation() )
                     for i in range( len( validMoves ) ):
                         if move == validMoves[ i ]:
@@ -80,6 +79,7 @@ def main():
                 if e.key == p.K_z:
                     gs.undoMove()
                     moveMade = True
+
         if moveMade:
             validMoves = gs.getValidMoves()
             moveMade = False

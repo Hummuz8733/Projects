@@ -1,3 +1,6 @@
+import time
+import pygame as p
+
 class GameState():
     def __init__( self ):
         self.board = [
@@ -27,6 +30,8 @@ class GameState():
             'p': self.getPawnMoves, 'R': self.getRookMoves, 'N': self.getKnightMoves,
             'B': self.getBishopMoves, 'Q': self.getQueenMoves, 'K': self.getKingMoves
         }
+
+
 
     def makeMove( self, move ):
         if move.castle == True:
@@ -63,6 +68,32 @@ class GameState():
             self.whiteToMove = not self.whiteToMove
             self.moveLog.append( move )
             pass
+        elif move.promotion == True:
+            print( "Choose which piece to promote to:" )
+            print( "q: Queen, r: Rook, b: Bishop, n: Knight" )
+            flag = False
+            while not flag:
+                for e in p.event.get():
+                    if e.type == p.KEYDOWN:
+                        if e.key == p.K_q:
+                            piece = 'Q'
+                            flag = True
+                        if e.key == p.K_r:
+                            piece = 'R'
+                            flag = True
+                        if e.key == p.K_n:
+                            piece = 'N'
+                            flag = True
+                        if e.key == p.K_b:
+                            piece = 'B'
+                            flag = True
+            self.board[ move.startRow ][ move.startColumn ] = "--"
+            if self.whiteToMove:
+                self.board[ move.endRow ][ move.endColumn ] = "w" + piece
+            else:
+                self.board[ move.endRow ][ move.endColumn ] = "b" + piece
+            self.moveLog.append( move )
+            self.whiteToMove = not self.whiteToMove
         else:
             self.board[ move.startRow ][ move.startColumn ] = "--"
             self.board[ move.endRow ][ move.endColumn ] = move.pieceMoved
@@ -168,7 +199,10 @@ class GameState():
         if self.board[ row ][ column ][ 0 ] == 'w':
             if self.board[ row - 1 ][ column ] == "--":
                 if not piecePinned or pinDirection == ( -1, 0 ) or pinDirection == ( 1, 0 ):
-                    moves.append( Move( ( row, column ), ( row - 1, column ), self.board ) )
+                    if row - 1 == 0:
+                        moves.append( Move( ( row, column ), ( row - 1, column ), self.board, False, False, True ) )
+                    else:
+                        moves.append( Move( ( row, column ), ( row - 1, column ), self.board ) )
                     if row == 6:    
                         if self.board[ row - 2 ][ column ] == "--":
                             if not piecePinned or pinDirection == ( -1, 0 ) or pinDirection == ( 1, 0 ):
@@ -176,22 +210,31 @@ class GameState():
             if column != 0:
                 if not piecePinned or pinDirection == ( -1, -1 ) or pinDirection == ( 1, 1 ):
                     if self.board[ row - 1 ][ column - 1 ][ 0 ] == 'b':
-                        moves.append( Move( ( row, column ), ( row - 1, column - 1 ), self.board ) )
+                        if row - 1 == 0:
+                            moves.append( Move( ( row, column ), ( row - 1, column - 1 ), self.board, False, False, True ) )
+                        else:
+                            moves.append( Move( ( row, column ), ( row - 1, column - 1 ), self.board ) )
                     if self.board[ row ][ column - 1 ] == "bp" and self.moveLog[ -1 ].pieceMoved == "bp" and row == 3 and self.moveLog[ -1 ].startRow == 1 and self.moveLog[ -1 ].startColumn == ( column - 1 ):
                         moves.append( Move( ( row, column ), ( row - 1, column - 1 ), self.board, True) ) 
 
             if column != 7:
                 if not piecePinned or pinDirection == ( -1, 1 ) or pinDirection == ( 1, -1 ):
                     if self.board[ row - 1 ][ column + 1 ][ 0 ] == 'b':
-                        moves.append( Move( ( row, column ), ( row - 1, column + 1 ), self.board ) )
+                        if row - 1 == 0:
+                            moves.append( Move( ( row, column ), ( row - 1, column + 1 ), self.board, False, False, True ) )
+                        else:
+                            moves.append( Move( ( row, column ), ( row - 1, column + 1 ), self.board ) )
                     if self.board[ row ][ column + 1 ] == "bp" and self.moveLog[ -1 ].pieceMoved == "bp" and row == 3 and self.moveLog[ -1 ].startRow == 1 and self.moveLog[ -1 ].startColumn == ( column + 1 ):
-                        moves.append( Move( ( row, column ), ( row - 1, column + 1 ), self.board, True) ) 
+                        moves.append( Move( ( row, column ), ( row - 1, column + 1 ), self.board, True ) ) 
                     
 
         if self.board[ row ][ column ][ 0 ] == 'b':
             if self.board[ row + 1 ][ column ] == "--":
                 if not piecePinned or pinDirection == ( 1, 0 ) or pinDirection == ( -1, 0 ):
-                    moves.append( Move( ( row, column ), ( row + 1, column ), self.board ) )
+                    if row + 1 == 7:
+                        moves.append( Move( ( row, column ), ( row + 1, column ), self.board, False, False, True ) )
+                    else:
+                        moves.append( Move( ( row, column ), ( row + 1, column ), self.board ) )
                 if row == 1:    
                     if self.board[ row + 2 ][ column ] == "--":
                         if not piecePinned or pinDirection == ( 1, 0 ) or pinDirection( -1, 0 ):
@@ -199,15 +242,22 @@ class GameState():
             if column != 0:
                 if not piecePinned or pinDirection == ( 1, -1 ) or pinDirection == ( -1, 1 ):
                     if self.board[ row + 1 ][ column - 1 ][ 0 ] == 'w':
-                        moves.append( Move( ( row, column ), ( row + 1, column - 1 ), self.board ) )
+                        if row + 1 == 7:
+                            moves.append( Move( ( row, column ), ( row + 1, column - 1), self.board, False, False, True ) )
+                        else:
+                            moves.append( Move( ( row, column ), ( row + 1, column - 1 ), self.board ) )
                     if self.board[ row ][ column - 1 ] == "wp" and self.moveLog[ -1 ].pieceMoved == "wp" and row == 4 and self.moveLog[ -1 ].startRow == 6 and self.moveLog[ -1 ].startColumn == ( column - 1 ):
                         moves.append( Move( ( row, column ), ( row + 1, column - 1 ), self.board, True) ) 
             if column != 7:
                 if not piecePinned or pinDirection == ( 1, -1 ) or pinDirection == ( -1, 1 ):
                     if self.board[ row + 1 ][ column + 1 ][ 0 ] == 'w':
-                        moves.append( Move( ( row, column ), ( row + 1, column + 1 ), self.board ) )
+                        if row + 1 == 7:
+                            moves.append( Move( ( row, column ), ( row + 1, column + 1), self.board, False, False, True ) )
+                        else:
+                            moves.append( Move( ( row, column ), ( row + 1, column + 1 ), self.board ) )
                     if self.board[ row ][ column + 1 ] == "wp" and self.moveLog[ -1 ].pieceMoved == "wp" and row == 4 and self.moveLog[ -1 ].startRow == 6 and self.moveLog[ -1 ].startColumn == ( column + 1 ):
                         moves.append( Move( ( row, column ), ( row + 1, column + 1 ), self.board, True) ) 
+        
         
 
 
