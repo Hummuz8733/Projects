@@ -14,6 +14,12 @@ class GameState():
         self.moveLog = []
         self.whiteKingLocation = ( 7, 4 )
         self.blackKingLocation = ( 0, 4 )
+        self.whiteKingMoved = 0
+        self.blackKingMoved = 0
+        self.leftWhiteRookMoved = 0
+        self.rightWhiteRookMoved = 0
+        self.leftBlackRookMoved = 0
+        self.rightBlackRookMoved = 0
         self.inCheck = False
         self.pins = []
         self.checks = []
@@ -23,31 +29,66 @@ class GameState():
         }
 
     def makeMove( self, move ):
-        self.board[ move.startRow ][ move.startColumn ] = "--"
-        self.board[ move.endRow ][ move.endColumn ] = move.pieceMoved
-        self.moveLog.append( move )
-        if move.enpassant == True:
-            if self.whiteToMove:
-                self.board[ move.endRow + 1 ][ move.endColumn ] = "--"
+        if move.castle == True:
+            if move.endRow == 7:
+                if move.endColumn == 0:
+                    self.board[ 7 ][ 0 ] = "--"
+                    self.board[ 7 ][ 2 ] = "wK"
+                    self.board[ 7 ][ 3 ] = "wR"
+                    self.board[ 7 ][ 4 ] = "--"
+                    self.whiteKingMoved += 1
+                    self.leftWhiteRookMoved += 1
+                if move.endColumn == 7:
+                    self.board[ 7 ][ 4 ] = "--"
+                    self.board[ 7 ][ 5 ] = "wR"
+                    self.board[ 7 ][ 6 ] = "wK"
+                    self.board[ 7 ][ 7 ] = "--"
+                    self.whiteKingMoved += 1
+                    self.rightWhiteRookMoved += 1
             else:
-                self.board[ move.endRow - 1 ][ move.endColumn ] = "--"
-        self.whiteToMove = not self.whiteToMove
-        if move.pieceMoved == "wK":
-            self.whiteKingMoved = True
-            self.whiteKingLocation = ( move.endRow, move.endColumn )
-        if move.pieceMoved == "bK":
-            self.whiteKingMoved = True
-            self.blackKingLocation = ( move.endRow, move.endColumn )
-        if move.pieceMoved == "wR":
-            if move.startRow == 7 and move.startColumn == 0:
-                self.leftWhiteRookMoved = True
-            if move.startRow == 7 and move.startColumn == 7:
-                self.rightWhiteRookMoved = True
-        if move.pieceMoved == "bR": 
-            if move.startRow == 0 and move.startColumn == 0:
-                self.leftBlackRookMoved = True
-            if move.startRow == 0 and move.startColumn == 7:
-                self.rightBlackRookMoved = True
+                if move.endColumn == 0:
+                    self.board[ 0 ][ 0 ] = "--"
+                    self.board[ 0 ][ 2 ] = "bK"
+                    self.board[ 0 ][ 3 ] = "bR"
+                    self.board[ 0 ][ 4 ] = "--"
+                    self.blackKingMoved += 1
+                    self.leftBlackRookMoved += 1
+                if move.endColumn == 7:
+                    self.board[ 0 ][ 4 ] = "--"
+                    self.board[ 0 ][ 5 ] = "bR"
+                    self.board[ 0 ][ 6 ] = "bK"
+                    self.board[ 0 ][ 7 ] = "--"
+                    self.blackKingMoved += 1
+                    self.rightBlackRookMoved += 1
+            self.whiteToMove = not self.whiteToMove
+            self.moveLog.append( move )
+            pass
+        else:
+            self.board[ move.startRow ][ move.startColumn ] = "--"
+            self.board[ move.endRow ][ move.endColumn ] = move.pieceMoved
+            self.moveLog.append( move )
+            if move.enpassant == True:
+                if self.whiteToMove:
+                    self.board[ move.endRow + 1 ][ move.endColumn ] = "--"
+                else:
+                    self.board[ move.endRow - 1 ][ move.endColumn ] = "--"
+            self.whiteToMove = not self.whiteToMove
+            if move.pieceMoved == "wK":
+                self.whiteKingMoved += 1
+                self.whiteKingLocation = ( move.endRow, move.endColumn )
+            if move.pieceMoved == "bK":
+                self.blackKingMoved += 1
+                self.blackKingLocation = ( move.endRow, move.endColumn )
+            if move.pieceMoved == "wR":
+                if move.startRow == 7 and move.startColumn == 0:
+                    self.leftWhiteRookMoved += 1
+                if move.startRow == 7 and move.startColumn == 7:
+                    self.rightWhiteRookMoved += 1
+            if move.pieceMoved == "bR": 
+                if move.startRow == 0 and move.startColumn == 0:
+                    self.leftBlackRookMoved += 1
+                if move.startRow == 0 and move.startColumn == 7:
+                    self.rightBlackRookMoved += 1
 
         
 
@@ -62,11 +103,57 @@ class GameState():
                     self.board[ lastMove.endRow - 1 ][ lastMove.endColumn ] = "wp"
                 else:
                     self.board[ lastMove.endRow + 1 ][ lastMove.endColumn ] = "bp"
-            self.whiteToMove = not self.whiteToMove
-            if lastMove.pieceMoved == "wK":
-                self.whiteKingLocation = ( lastMove.startRow, lastMove.startColumn )
-            if lastMove.pieceMoved == "bK":
-                self.blackKingLocation = ( lastMove.startRow, lastMove.startColumn )
+            if lastMove.castle == True:
+                if lastMove.endRow == 7:
+                    if lastMove.endColumn == 0:
+                        self.board[ 7 ][ 0 ] = "wR"
+                        self.board[ 7 ][ 2 ] = "--"
+                        self.board[ 7 ][ 3 ] = "--"
+                        self.board[ 7 ][ 4 ] = "wK"
+                        self.whiteKingMoved -= 1
+                        self.leftWhiteRookMoved -= 1
+                    if lastMove.endColumn == 7:
+                        self.board[ 7 ][ 4 ] = "wK"
+                        self.board[ 7 ][ 5 ] = "--"
+                        self.board[ 7 ][ 6 ] = "--"
+                        self.board[ 7 ][ 7 ] = "wR"
+                        self.whiteKingMoved -= 1
+                        self.rightWhiteRookMoved -= 1
+                else:
+                    if lastMove.endColumn == 0:
+                        self.board[ 0 ][ 0 ] = "bR"
+                        self.board[ 0 ][ 2 ] = "--"
+                        self.board[ 0 ][ 3 ] = "--"
+                        self.board[ 0 ][ 4 ] = "bK"
+                        self.blackKingMoved -= 1
+                        self.leftBlackRookMoved -= 1
+                    if lastMove.endColumn == 7:
+                        self.board[ 0 ][ 4 ] = "bK"
+                        self.board[ 0 ][ 5 ] = "--"
+                        self.board[ 0 ][ 6 ] = "--"
+                        self.board[ 0 ][ 7 ] = "bR"
+                        self.blackKingMoved -= 1
+                        self.rightBlackRookMoved -= 1
+                self.whiteToMove = not self.whiteToMove
+            else:
+                self.whiteToMove = not self.whiteToMove
+                if lastMove.pieceMoved == "wK":
+                    self.whiteKingLocation = ( lastMove.startRow, lastMove.startColumn )
+                    self.whiteKingMoved -= 1
+                if lastMove.pieceMoved == "bK":
+                    self.blackKingLocation = ( lastMove.startRow, lastMove.startColumn )
+                    self.blackKingMoved -= 1
+                if lastMove.pieceMoved == "wR":
+                    if self.leftWhiteRookMoved == 1 and lastMove.startColumn == 0:
+                        self.leftWhiteRookMoved -= 1
+                    if self.rightWhiteRookMoved == 1 and lastMove.startColumn == 7:
+                        self.rightWhiteRookMoved -= 1
+                else:
+                    if self.leftBlackRookMoved == 1 and lastMove.startColumn == 0:
+                        self.leftBlackRookMoved -= 1
+                    if self.rightBlackRookMoved == 1 and lastMove.startColumn == 7:
+                        self.rightBlackRookMoved -= 1
+
 
     def getPawnMoves( self, row, column, moves ):
         piecePinned = False
@@ -295,12 +382,56 @@ class GameState():
                     else:
                         self.blackKingLocation = ( toRow, toColumn )
                     inCheck, pins, checks = self.checkForPinsAndChecks()
-                    if not self.inCheck:
+                    if not inCheck:
                         moves.append( Move( ( row, column ), ( toRow, toColumn ), self.board ) )
                     if self.board[ row ][ column ][ 0 ] == 'w':
                         self.whiteKingLocation = ( row, column )
                     else:
                         self.blackKingLocation = ( row, column )
+        if self.whiteToMove:
+            if self.whiteKingMoved == 0:
+                if self.leftWhiteRookMoved == 0 and self.board[ 7 ][ 2 ] == "--" and self.board[ 7 ][ 3 ] == "--":
+                    self.whiteKingLocation = ( 7, 1 )
+                    inCheck, pins, checks = self.checkForPinsAndChecks()
+                    if not inCheck:
+                        self.whiteKingLocation = ( 7, 2 )
+                        inCheck, pins, checks = self.checkForPinsAndChecks()
+                        if not inCheck:
+                            self.whiteKingLocation = ( 7, 3 )
+                            inCheck, pins, checks = self.checkForPinsAndChecks()
+                            if not inCheck:
+                                moves.append( Move( ( row, column ), ( 7, 0 ), self.board, False, True ) )
+                elif self.rightWhiteRookMoved  == 0 and self.board[ 7 ][ 5 ] == "--" and self.board[ 7 ][ 6 ] == "--":
+                    self.whiteKingLocation = ( 7, 5 )
+                    inCheck, pins, checks = self.checkForPinsAndChecks()
+                    if not inCheck:
+                        self.whiteKingLocation = ( 7, 6 )
+                        inCheck, pins, checks = self.checkForPinsAndChecks()
+                        if not inCheck:
+                            moves.append( Move( ( row, column ), ( 7, 7 ), self.board, False, True ) )
+        else:
+            if self.blackKingMoved == 0:
+                if self.leftBlackRookMoved == 0 and self.board[ 0 ][ 2 ] == "--" and self.board[ 0 ][ 3 ] == "--":
+                    self.blackKingLocation = ( 0, 1 )
+                    inCheck, pins, checks = self.checkForPinsAndChecks()
+                    if not inCheck:
+                        self.blackKingLocation = ( 0, 2 )
+                        inCheck, pins, checks = self.checkForPinsAndChecks()
+                        if not inCheck:
+                            self.blackKingLocation = ( 0, 3 )
+                            inCheck, pins, checks = self.checkForPinsAndChecks()
+                            if not inCheck:
+                                moves.append( Move( ( row, column ), ( 0, 0 ), self.board, False, True ) )
+                elif self.rightBlackRookMoved == 0 and self.board[ 0 ][ 5 ] == "--" and self.board[ 0 ][ 6 ] == "--":
+                    self.blackKingLocation = ( 0, 5 )
+                    inCheck, pins, checks = self.checkForPinsAndChecks()
+                    if not inCheck:
+                        self.blackKingLocation = ( 0, 6 )
+                        inCheck, pins, checks = self.checkForPinsAndChecks()
+                        if not inCheck:
+                            moves.append( Move( ( row, column ), ( 0, 7 ), self.board, False, True ) )
+
+
                     
     
     def checkForPinsAndChecks( self ):
@@ -405,6 +536,7 @@ class GameState():
                 if ( color == 'w' and self.whiteToMove ) or ( color == 'b' and not self.whiteToMove ):
                     piece = self.board[ i ][ j ][ 1 ]
                     self.moveFunctions[ piece ]( i, j, moves )
+
         return moves
                     
 
@@ -424,12 +556,14 @@ class Move():
     }
     columnsToFiles = { v: k for k , v in filesToColumns.items() }
 
-    def __init__( self, startSq, endSq, board, isEnpassant = False ):
+    def __init__( self, startSq, endSq, board, isEnpassant = False, isCastle = False, isPromotion = False ):
         self.startRow = startSq[ 0 ]
         self.startColumn = startSq[ 1 ]
         self.endRow = endSq[ 0 ]
         self.endColumn = endSq[ 1 ]
         self.enpassant = isEnpassant
+        self.castle = isCastle
+        self.promotion = isPromotion
         self.pieceMoved = board[ self.startRow ][ self.startColumn ]
         self.pieceCaptured = board[ self.endRow ][ self.endColumn ]
         self.moveID = self.startRow * 1000 + self.startColumn * 100 + self.endRow * 10 + self.endColumn

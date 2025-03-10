@@ -60,7 +60,12 @@ def main():
                     sqSelected = ( row, column )
                     playerClicks.append( sqSelected )
                 if len( playerClicks ) == 2:
-                    move = chessengine.Move( playerClicks[ 0 ], playerClicks[ 1 ], gs.board )
+                    if ( playerClicks[ 0 ] == ( 7, 4 ) and ( playerClicks [ 1 ] == ( 7, 0 ) or playerClicks[ 1 ] == ( 7, 7 ) ) ) or ( playerClicks[ 0 ] == ( 0, 4 ) and ( playerClicks [ 1 ] == ( 0, 0 ) or playerClicks[ 1 ] == ( 0, 7 ) ) ):
+                        move = chessengine.Move( playerClicks[ 0 ], playerClicks[ 1 ], gs.board, False, True )
+                    else:
+                        move = chessengine.Move( playerClicks[ 0 ], playerClicks[ 1 ], gs.board )
+
+
                     print( move.getChessNotation() )
                     for i in range( len( validMoves ) ):
                         if move == validMoves[ i ]:
